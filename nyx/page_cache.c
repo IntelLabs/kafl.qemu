@@ -343,6 +343,24 @@ uint64_t page_cache_fetch2(page_cache_t* self, uint64_t page, bool* success){
 	return page_cache_fetch(self, page, success, false);
 }
 
+static int create_or_open_file(const char *pathname)
+{
+	int fd;
+
+	fd = open(pathname, O_CLOEXEC | O_CREAT | O_EXCL | O_RDWR, 0644);
+	if (fd < 0) {
+		assert(errno == EEXIST);
+		fd = open(pathname, O_CLOEXEC | O_RDWR, 0644);
+	}
+
+	if (fd == -1) {
+		fprintf(stderr, "[!] Failed to open page cache file %s\n.", pathname);
+		exit(1);
+	}
+
+	return fd;
+}
+
 #ifndef STANDALONE_DECODER
 page_cache_t* page_cache_new(CPUState *cpu, const char* cache_file){
 #else
@@ -359,18 +377,12 @@ page_cache_t* page_cache_new(const char* cache_file, uint8_t disassembler_word_w
 
 
 	self->lookup = kh_init(PC_CACHE);
-	self->fd_page_file = open(tmp1, O_CLOEXEC | O_CREAT | O_RDWR, 0644);
-	self->fd_address_file = open(tmp2, O_CLOEXEC | O_CREAT | O_RDWR, 0644);
+	self->fd_page_file = create_or_open_file(tmp1);
+	self->fd_address_file = create_or_open_file(tmp2);
+	self->fd_lock = create_or_open_file(tmp3);
 
 #ifndef STANDALONE_DECODER
 	self->cpu = cpu;
-	self->fd_lock = open(tmp3, O_CLOEXEC | O_CREAT, 0644);
-	assert(self->fd_lock > 0);
-#else
-	if(self->fd_page_file == -1 || self->fd_address_file == -1){
-		printf("[ ] Page cache files not found...\n");
-		exit(1);
-	}
 #endif
 
 	memset(self->disassemble_cache, 0x0, 16);
