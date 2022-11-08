@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "khash.h"
 #include <stdint.h>
+#include <time.h>
 
 
 typedef struct sharedir_file_s{
