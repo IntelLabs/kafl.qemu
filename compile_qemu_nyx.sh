@@ -113,7 +113,6 @@ if [ -z "$LIBXDC_ROOT" -o -z "$CAPSTONE_ROOT" ]; then
 	CAPSTONE_ROOT="$PWD/capstone_v4"
 fi
 
-make clean
 compile_libraries $1
 configure_qemu $1
 compile_qemu
