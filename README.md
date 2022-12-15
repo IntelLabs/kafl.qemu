@@ -7,7 +7,7 @@ This repository hosts stable and feature branches of [QEMU-Nyx](http://github.co
 Branches overview:
 - `master` - info / attribution (this page)
 - `qemu-nyx-<version>` follows upstream [Qemu-Nyx](http://github.com/nyx-fuzz/QEMU-Nyx) version
-- `kafl_<version>` - versioned/stable branches used by kAFL (expect to closely follow Qemu-Nyx)
-- `<topic>_<version>` - branches and derivates for other / experimental usages
+- `kafl-<version>` - versioned/stable branches used by kAFL (expect to closely follow Qemu-Nyx)
+- `<topic>-<version>` - branches and derivates for other / experimental usages
 
 Whenever possible, post patches/issues against the upstream top-level [kAFL](http://github.com/IntelLabs/kAFL/), [Nyx](http://github.com/nyx-fuzz/) or [QEMU-Nyx](http://github.com/nyx-fuzz/QEMU-Nyx) projects.
