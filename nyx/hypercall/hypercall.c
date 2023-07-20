@@ -300,6 +300,24 @@ static void handle_hypercall_kafl_range_submit(struct kvm_run *run,
         GET_GLOBAL_STATE()->pt_ip_filter_configured[buffer[2]] = true;
         nyx_debug_p(CORE_PREFIX, "Configured range register IP%ld: 0x%08lx-0x%08lx\n",
                     buffer[2], buffer[0], buffer[1]);
+        // dump new IP config in $WORKDIR/range_submit.yaml
+        // to be read by fuzzer on shutdown, and to update the $WORKDIR/config.yaml
+        // so kafl cov can get its IP configuration automatically
+        char *range_submit_path = NULL;
+        asprintf(&range_submit_path, "%s/range_submit.yaml", GET_GLOBAL_STATE()->workdir_path);
+        nyx_debug_p(CORE_PREFIX, "Writing new IP range %ld in %s\n", buffer[2], range_submit_path);
+        FILE *f = fopen(range_submit_path, "w");
+        if (!f) {
+            nyx_warn("unable to open %s/range_submit.yaml. Error: %s\n", GET_GLOBAL_STATE()->workdir_path, strerror(errno));
+            return;
+        }
+        for (int i = 0; i < INTEL_PT_MAX_RANGES; i++) {
+            if (GET_GLOBAL_STATE()->pt_ip_filter_configured[i]) {
+                fprintf(f, "ip%ld: %08lx-%08lx\n", i, GET_GLOBAL_STATE()->pt_ip_filter_a[i], GET_GLOBAL_STATE()->pt_ip_filter_b[i]);
+            }
+        }
+        fclose(f);
+        free(range_submit_path);
     } else {
         nyx_warn("ignoring invalid range register %ld (NULL page)\n", buffer[2]);
     }
